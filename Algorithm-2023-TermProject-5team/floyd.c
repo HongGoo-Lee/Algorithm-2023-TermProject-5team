@@ -388,26 +388,31 @@ int check_City(City city)
     return res;
 }
 
+
+//새로운 도시 추가하는 함수
 int add_new_City(City new)
 {
     FILE* fp = fopen("지역목록.txt", "a");
     if (check_City(new) == 0)
     {
         fprintf(fp, "%s&%d\n", new.city, 0);
-        return 0;
+        return 0;// 정상작동
     }
     else
     {
-        return 1;
+        return 1; // 이미 같은 지역이 있음
     }
 }
 
+
+// 판매내역 기록하는 함수
 void add_new_SoldData(SoldData new)
 {
     FILE* fp = fopen("판매목록.txt", "a");
     fprintf(fp, "%s&%s&%d&%d%d%d%d%d%c\n", new.name, new.category, new.count, new.soldDate.year, new.soldDate.month, new.soldDate.day, new.money, new.delivery, new.del);
 }
 
+// 같은 제품이 있는지 확인하는 함수
 int check_Product(Product product)
 {
     FILE* fp = fopen("물품목록.txt", "r");
@@ -418,13 +423,15 @@ int check_Product(Product product)
         fscanf(fp, "%s&%s&%d&%d&%d&%d\n", p.name, p.category, &p.price, &p.count, &soldCount, &del);
         if (strcmp(p.name, product.name) == 0)
         {
-            res = 1;
+            res = 1;// 같은 제품이 있음
             break;
         }
     }
     return res;
 }
 
+
+//새로운 제품을 추가하는 함수
 int add_new_Product(Product new)
 {
     FILE* fp = fopen("물품목록.txt", "a");
@@ -432,14 +439,16 @@ int add_new_Product(Product new)
     if (check_Product(new) == 0)
     {
         fprintf(fp, "%s&%s&%d&%d&%d&%d\n", new.name, new.category, new.price, new.count, soldCount, del);
-        return 0;
+        return 0;// 정상작동
     }
     else
     {
-        return 1;
+        return 1;//이미 같은 제품이 있음
     }
 }
 
+
+// 도로 수정하는 함수
 int modifyRoad(Road old, Road new) {
     FILE* file = fopen("도로목록.txt", "r+");
     if (file == NULL) {
@@ -476,6 +485,8 @@ int modifyRoad(Road old, Road new) {
     return res;
 }
 
+
+//도로 삭제하는 함수 del값만 1로 바꿈
 int deleteRoad(Road delRoad)
 {
     int res = 0;
@@ -510,6 +521,8 @@ int deleteRoad(Road delRoad)
     }
 }
 
+
+//지역 정보 수정하는 함수
 int modifyCity(City old, City new)
 {
     FILE* file = fopen("지역목록.txt", "r+");
@@ -548,6 +561,7 @@ int modifyCity(City old, City new)
     return res;
 }
 
+//지역을 삭제하는 함수
 int deleteCity(City old)
 {
     FILE* file = fopen("지역목록.txt", "r+");
@@ -593,6 +607,8 @@ int deleteCity(City old)
     return res;
 }
 
+
+//제품 정보 수정하는 함수
 void modifyProduct(Product old, Product new)
 {
     FILE* file = fopen("물품목록.txt", "r+");
