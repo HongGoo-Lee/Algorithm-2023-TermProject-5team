@@ -113,6 +113,7 @@ int get_file_line(char* fname)
         fgets(tmp,500,fp);
         res++;
     }
+    fclose(fp);
     return res;
 }
 
@@ -128,6 +129,7 @@ int get_product_count(char* category)
         if (strcmp(category, category1) == 0)
             size++;
     }
+    fclose(fp);
     return size;
 }
 
@@ -159,7 +161,7 @@ Product* get_product_list(char* category)
             res[i++] = get_struct_product(name, category1, price, count);
         }
     }
-
+    fclose(fp);
     return res;
 }
 
@@ -174,7 +176,7 @@ City* get_City_list(void)
     {
         fscanf(fp, "%s&%d\n", res[i].city, &tmp);
     }
-
+    fclose(fp);
     return res;
 }
 
@@ -219,6 +221,7 @@ SoldData* get_soldData_list(void)
         fscanf(fp, "%s&%s&%d&%d%d%d%d%d%c\n", name, category, &count, &year, &month, &day, &money, &delivery, &del);
         res[i++] = make_struct_SoldData(name, category, count, year, month, day, money, delivery, del);
     }
+    fclose(fp);
     return res;
 }
 
@@ -242,6 +245,7 @@ int get_Road_count(char* start)
             if (strcmp(start, fstart) == 0)
                 res++;
         }
+        fclose(fp);
     }
     return res;
 }
@@ -288,6 +292,7 @@ Road* get_Road_list(char* start)
             }
         }
     }
+    fclose(fp);
     return res;
 }
 
@@ -297,6 +302,7 @@ int check_manager_key(char* key)
     char fkey[20];
     FILE* fp = fopen("관리자파일.txt", "r");
     fscanf(fp, "%s", fkey);
+    fclose(fp);
     return strcmp(key, fkey);
 }
 
@@ -305,6 +311,7 @@ void reset_manager_key(char* key)
 {
     FILE* fp = fopen("관리자파일.txt", "w");
     fprintf(fp, "%s", key);
+    fclose(fp);
 }
 
 //이미 같은 도로가 있는지 체크 같은 도로가 있으면 1을 반환 없으면 0
@@ -323,6 +330,7 @@ int check_Road(Road road)
             break;
         }
     }
+    fclose(fp);
     return res;
 }
 
@@ -385,6 +393,7 @@ int check_City(City city)
             break;
         }
     }
+    fclose(fp);
     return res;
 }
 
@@ -392,10 +401,11 @@ int check_City(City city)
 //새로운 도시 추가하는 함수
 int add_new_City(City new)
 {
-    FILE* fp = fopen("지역목록.txt", "a");
     if (check_City(new) == 0)
     {
+        FILE* fp = fopen("지역목록.txt", "a");
         fprintf(fp, "%s&%d\n", new.city, 0);
+        fclose(fp);
         return 0;// 정상작동
     }
     else
@@ -410,6 +420,7 @@ void add_new_SoldData(SoldData new)
 {
     FILE* fp = fopen("판매목록.txt", "a");
     fprintf(fp, "%s&%s&%d&%d%d%d%d%d%c\n", new.name, new.category, new.count, new.soldDate.year, new.soldDate.month, new.soldDate.day, new.money, new.delivery, new.del);
+    fclose(fp);
 }
 
 // 같은 제품이 있는지 확인하는 함수
@@ -427,6 +438,7 @@ int check_Product(Product product)
             break;
         }
     }
+    fclose(fp);
     return res;
 }
 
@@ -434,11 +446,12 @@ int check_Product(Product product)
 //새로운 제품을 추가하는 함수
 int add_new_Product(Product new)
 {
-    FILE* fp = fopen("물품목록.txt", "a");
     int soldCount = 0, del = 0;
     if (check_Product(new) == 0)
     {
+        FILE* fp = fopen("물품목록.txt", "a");
         fprintf(fp, "%s&%s&%d&%d&%d&%d\n", new.name, new.category, new.price, new.count, soldCount, del);
+        fclose(fp);
         return 0;// 정상작동
     }
     else
@@ -514,11 +527,14 @@ int deleteRoad(Road delRoad)
         }
         else
             res = 2;//이미 지움
+        fclose(fp);
     }
     else
     {
         res = 1;// 입력한 정보의 도로가 없음
     }
+
+    return res;
 }
 
 
