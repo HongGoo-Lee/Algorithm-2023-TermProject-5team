@@ -307,7 +307,7 @@ void reset_manager_key(char* key)
     fprintf(fp, "%s", key);
 }
 
-//이미 같은 도로가 있는지 체크
+//이미 같은 도로가 있는지 체크 같은 도로가 있으면 1을 반환 없으면 0
 int check_Road(Road road)
 {
     FILE* fp = fopen("도로목록.txt", "r");
@@ -370,6 +370,7 @@ int add_new_Road(Road new)
         return 1;
 }
 
+// 지역이 이미 있는 지역인지 확인하는 함수 있으면 1 없으면 0을 반환
 int check_City(City city)
 {
     FILE* fp = fopen("지역목록.txt", "r");
@@ -439,3 +440,196 @@ int add_new_Product(Product new)
     }
 }
 
+int modifyRoad(Road old, Road new) {
+    FILE* file = fopen("도로목록.txt", "r+");
+    if (file == NULL) {
+        printf("파일을 여는 도중 오류 발생!\n");
+        return;
+    }
+
+    Road edge;
+    long pos;
+    int del=0, res = 0;
+    if (check_Road(old)==1 && check_Road(new)==0)
+    {
+        while (!feof(file)) {
+            pos = ftell(file);
+            fscanf(file, "%s&%s&%d&%d&%d&%d\n", edge.start, edge.arrival, &edge.km, &edge.cost, &edge.time, &del);
+            if (strcmp(old.start, edge.start) == 0 && strcmp(old.arrival, edge.arrival) == 0 && del == 0) {
+                fseek(file, pos, SEEK_SET);
+                fprintf(file, "%s&%s&%d&%d&%d&%d\n", new.start, new.arrival, new.km, new.cost, new.time, 0);
+                break;
+            }
+        }
+        res = 0;//정상적으로 수정함
+    }
+    else if (check_Road(new))
+    {
+        res = 2;//같은 도로가 이미 있어서 수정 불가능
+    }
+    else
+    {
+        res = 1;//수정하려는 도로가 없음
+    }
+    fclose(file);
+
+    return res;
+}
+
+int deleteRoad(Road delRoad)
+{
+    int res = 0;
+    if (check_Road(delRoad) == 1)
+    {
+        FILE* fp = fopen("도로목록.txt", "r+");
+        Road edge;
+        long pos;
+        int del, found=0;
+        while (!feof(fp))
+        {
+            pos = ftell(fp);
+            fscanf(fp, "%s&%s&%d&%d&%d&%d\n", edge.start, edge.arrival, &edge.km, &edge.cost, &edge.time, &del);
+            if (strcmp(delRoad.start, edge.start) == 0 && strcmp(delRoad.arrival, edge.arrival) == 0 && del == 0)
+            {
+                found = 1;
+                break;
+            }
+        }
+        if (found == 1)
+        {
+            fseek(fp, pos, SEEK_SET);
+            fprintf(fp, "%s&%s&%d&%d&%d&%d\n", delRoad.start, delRoad.arrival, delRoad.km, delRoad.cost, delRoad.time, 1);
+            res = 0;//정상
+        }
+        else
+            res = 2;//이미 지움
+    }
+    else
+    {
+        res = 1;// 입력한 정보의 도로가 없음
+    }
+}
+
+int modifyCity(City old, City new)
+{
+    FILE* file = fopen("지역목록.txt", "r+");
+    if (file == NULL) {
+        printf("파일을 여는 도중 오류 발생!\n");
+        return;
+    }
+    City city;
+    long int pos;
+    int found = 0, del = 0, res = 1;
+    if (check_City(old) == 1 && check_City(new) == 0)
+    {
+        while (!feof(file))
+        {
+            pos = ftell(file);
+            fscanf(file, "%s&%d\n", city.city, &del);
+            if (strcmp(old.city, city.city) == 0 && del == 0)
+            {
+                found = 1;
+                break;
+            }
+        }
+        if (found == 1)
+        {
+            fseek(file, pos, SEEK_SET);
+            fprintf(file, "%s&%d\n", new.city, del);
+            res = 0;// 정상작동
+        }
+        fclose(file);
+    }
+    else if (check_City(new) == 1)
+        res = 1;//이미 똑같은 지역이 있어서 수정 불가능
+    else
+        res = 2;//바꾸려는 지역정보가 잘못됨
+
+    return res;
+}
+
+int deleteCity(City old)
+{
+    FILE* file = fopen("지역목록.txt", "r+");
+    if (file == NULL) {
+        printf("파일을 여는 도중 오류 발생!\n");
+        return;
+    }
+
+    City city;
+    long int pos;
+    int found = 0,del=0, res;
+
+    if (check_City(old) == 1)
+    {
+        while (!feof(file))
+        {
+            pos = ftell(file);
+            fscanf(file, "%s&%d\n", city.city, &del);
+            if (strcmp(old.city, city.city) == 0 && del == 0)
+            {
+                found = 1;
+                break;
+            }
+        }
+        if (found == 1)
+        {
+            fseek(file, pos, SEEK_SET);
+            fprintf(file, "%s&%d\n", old.city, 1);
+            res = 0;
+        }
+        else
+        {
+            res = 1;//이미 지움
+        }
+    }
+    else
+    {
+        res = 2;//삭제하려는 지역이 없음
+    }
+
+    fclose(file);
+
+    return res;
+}
+
+void modifyProduct(Product old, Product new)
+{
+    FILE* file = fopen("물품목록.txt", "r+");
+    if (file == NULL) {
+        printf("파일을 여는 도중 오류 발생!\n");
+        return;
+    }
+
+    Product product;
+    long int pos;
+    int found = 0, del, soldCount, res = 0;
+
+    if (check_Product(old) == 1 && check_Product(new) == 0)
+    {
+        while (!feof(file))
+        {
+            pos = ftell(file);
+            fscanf(file, "%s&%s%d&%d&%d&%d&%d\n", product.name, product.category, &product.price, &product.count, &soldCount, &del);
+            if (strcmp(old.name, product.name) == 0 && del == 0)
+            {
+                found = 1;
+                break;
+            }
+        }
+        if (found == 1)
+        {
+            fseek(file, pos, SEEK_SET);
+            fprintf(file, "%s&%s&%d&%d&%d&%d\n", product.name, product.category, product.price, product.count, soldCount, del);
+            res = 0;
+        }
+    }
+    else if (check_Product(new) == 1)
+        res = 1;//이미 똑같은 물품이 있음
+    else
+        res = 2;//정보를 잘못 입력함
+
+    fclose(file);
+
+    return res;
+}
