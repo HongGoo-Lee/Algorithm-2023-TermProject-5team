@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+//파일 처리가 어떻게 되는지 궁금해서 만든 함수
 void test()
 {
 	FILE* fp = fopen("test.txt", "w");
