@@ -1,4 +1,4 @@
-int main(void)
+void main(void)
 {
-	test_UI();
+	test();
 }

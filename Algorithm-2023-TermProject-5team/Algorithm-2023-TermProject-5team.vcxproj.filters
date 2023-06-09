@@ -21,5 +21,11 @@
     <ClCompile Include="UI.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="floyd.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="test.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
