@@ -610,7 +610,7 @@ void modifyProduct(Product old, Product new)
         while (!feof(file))
         {
             pos = ftell(file);
-            fscanf(file, "%s&%s%d&%d&%d&%d&%d\n", product.name, product.category, &product.price, &product.count, &soldCount, &del);
+            fscanf(file, "%s&%s&%d&%d&%d&%d\n", product.name, product.category, &product.price, &product.count, &soldCount, &del);
             if (strcmp(old.name, product.name) == 0 && del == 0)
             {
                 found = 1;
