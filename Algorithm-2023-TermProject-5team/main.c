@@ -1,4 +1,4 @@
 void main(void)
 {
-	test();
+	test_ui();
 }

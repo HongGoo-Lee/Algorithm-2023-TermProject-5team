@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="file_input_output.c" />
     <ClCompile Include="floyd.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="test.c" />
