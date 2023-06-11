@@ -4,22 +4,6 @@
 #include <string.h>
 #include "floyd.h"
 
-
-//파일의 레코드 수를 반환하는 함수
-int get_file_line(char* fname)
-{
-    FILE* fp = fopen(fname, "r");
-    int res = 0;
-    char tmp[500];
-    while (!feof(fp))
-    {
-        fgets(tmp, 500, fp);
-        res++;
-    }
-    fclose(fp);
-    return res;
-}
-
 //같은 카테고리가 파일에 있는지 확인하는 함수
 int check_Category(Category c)
 {
@@ -777,7 +761,7 @@ int deleteRoad(Road delRoad)
 void add_new_SoldData(SoldData new_s)
 {
     FILE* fp = fopen("판매내역.txt", "a");
-    fprintf(fp, "%s %s %d %d %d %d %d %d %c\n", new_s.name, new_s.category, new_s.count, new_s.soldDate.year, new_s.soldDate.month, new_s.soldDate.day, new_s.money, new_s.delivery, new_s.del);
+    fprintf(fp, "%s %s %d %d %d %d %d %d %d\n", new_s.name, new_s.category, new_s.count, new_s.soldDate.year, new_s.soldDate.month, new_s.soldDate.day, new_s.money, new_s.delivery, new_s.del);
     fclose(fp);
 }
 
@@ -793,7 +777,7 @@ Date make_struct_Date(int year, int month, int day)
 }
 
 // 입력된 데이터를 SoldData 구조체로 만들어주는 함수
-SoldData make_struct_SoldData(char* name, char* category, int count, int year, int month, int day, int money, int delivery, char del)
+SoldData make_struct_SoldData(char* name, char* category, int count, int year, int month, int day, int money, int delivery, int del)
 {
     SoldData res;
     res.soldDate = make_struct_Date(year, month, day);
@@ -807,17 +791,32 @@ SoldData make_struct_SoldData(char* name, char* category, int count, int year, i
     return res;
 }
 
-// 판매 목록을 1차원 배열로 만들어서 반환하는 함수
-SoldData* get_soldData_list(void)
+// 판매내역의 수를 반환하는 함수
+int get_soldData_count(void)
 {
-    int size = get_file_line("판매내역.txt");
-    SoldData* res = (SoldData*)calloc(size, sizeof(SoldData));
-    char name[41], category[41], del;
-    int count, year, month, day, money, delivery, i = 0;
+    char name[41], category[21];
+    int count, year, month, day, money, delivery,res = 0, del;
     FILE* fp = fopen("판매내역.txt", "r");
     while (!feof(fp))
     {
-        fscanf(fp, "%s %s %d %d %d %d %d %d %c\n", name, category, &count, &year, &month, &day, &money, &delivery, &del);
+        fscanf(fp, "%s %s %d %d %d %d %d %d %d\n", name, category, &count, &year, &month, &day, &money, &delivery, &del);
+        res++;
+    }
+    fclose(fp);
+    return res;
+}
+
+// 판매 목록을 1차원 배열로 만들어서 반환하는 함수
+SoldData* get_soldData_list(void)
+{
+    int size = get_soldData_count();
+    SoldData* res = (SoldData*)calloc(size, sizeof(SoldData));
+    char name[41], category[21];
+    int count, year, month, day, money, delivery, del,i = 0;
+    FILE* fp = fopen("판매내역.txt", "r");
+    while (!feof(fp))
+    {
+        fscanf(fp, "%s %s %d %d %d %d %d %d %d\n", name, category, &count, &year, &month, &day, &money, &delivery, &del);
         res[i++] = make_struct_SoldData(name, category, count, year, month, day, money, delivery, del);
     }
     fclose(fp);

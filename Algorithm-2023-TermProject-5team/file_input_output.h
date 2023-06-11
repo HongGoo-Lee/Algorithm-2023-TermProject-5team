@@ -37,3 +37,4 @@ int get_City_num(char* c);
 void buy_product(char* name, char* category, int count, int price, int delivery);
 Product* search_Product(char* str);
 int search_Product_count(char* str);
+int get_soldData_count(void);

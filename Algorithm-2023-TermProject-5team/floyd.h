@@ -33,7 +33,7 @@ typedef struct _soldData {
     Date soldDate;
     int money;
     int delivery;
-    char del;//환불여부
+    int del;//환불여부
 }SoldData;
 
 typedef struct _category {

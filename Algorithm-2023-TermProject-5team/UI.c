@@ -809,6 +809,22 @@ void location_menu() {
 	}
 }
 
+void sales_menu()
+{
+	system("cls");
+	printf(" \n");
+	printf("%38s", "");
+	printf("<< 판매 내역 >>\n");
+	printf("\n");
+	SoldData* s = get_soldData_list();
+	int size = get_soldData_count();
+	for (int i = 0; i < size; i++)
+	{
+		printf("제품명: %s, 카테고리: %s, 개수: %d개, 날짜: %d년 %d월 %d일, 총 금액: %d원, 배송 여부: %d\n\n",
+			s[i].name, s[i].category, s[i].count, s[i].soldDate.year, s[i].soldDate.month, s[i].soldDate.day, s[i].money, s[i].delivery);
+	}
+}
+
 //관리자 메뉴
 void admin_menu()
 {
@@ -908,7 +924,7 @@ void admin_menu()
 			road_menu();
 		}
 		else if (menu_num == 4) {
-			//sales_menu();
+			sales_menu();
 		}
 		else if (menu_num == 5) {
 			key_menu();
