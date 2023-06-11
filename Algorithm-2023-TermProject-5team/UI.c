@@ -4,6 +4,7 @@
 #include "file_input_output.h"
 #include "floyd.h"
 
+//좌표이동 함수
 void GotoXY(int x, int y) {
     COORD Pos;
     Pos.X = x;
@@ -11,6 +12,7 @@ void GotoXY(int x, int y) {
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Pos);
 }
 
+// 카테고리출력 화면의 틀
 void print_category_screen_frame(void)
 {
 	system("cls");
@@ -37,6 +39,7 @@ void print_category_screen_frame(void)
 	printf("┘\n");
 }
 
+// 사각형과 그 사각형 안에 문자열을 넣어 출력하는 함수
 void print_square(int x, int y, char* msg)
 {
 	GotoXY(x, y);
@@ -53,6 +56,7 @@ void print_square(int x, int y, char* msg)
 	printf("┘");
 }
 
+//입력창을 출력하는 함수
 void print_input_square(int x, int y)
 {
 	GotoXY(x, y );
@@ -76,6 +80,7 @@ void print_input_square(int x, int y)
 	GotoXY(x+12, y+1);
 }
 
+// 카테고리 출력하는 함수
 void print_category_screen()
 {
 	system("cls");
@@ -103,6 +108,7 @@ void print_category_screen()
 	GotoXY(36, 6);
 }
 
+// 프로그램 초기화면
 void print_user_ui()
 {
 	int i = 0;
@@ -165,17 +171,14 @@ void print_user_ui()
 	GotoXY(42, 12);
 }
 
-//뭐냐 물건 목록을 출력
+//물건 목록을 출력하는 함수
 void print_product_list(char* category)
 {
 	Product* p = get_product_list(category);
 	int i,size = get_product_count(category);
 	system("cls");
-	print_category_screen_frame();
 	GotoXY(40, 1);
 	printf("<<%s>>",category);
-	GotoXY(25, 5);
-	printf("size = %d", size);
 	for (i = 0; i < size; i++)
 	{
 		GotoXY(25, 5+i*2);
@@ -201,6 +204,7 @@ void print_buy_check_screen(char* name, int count, int price)
 	print_input_square(25, 18);
 } 
 
+// 배달여부 출력하는 함수
 void print_delivery_screen(char* arrival)
 {
 	system("cls");
@@ -220,14 +224,15 @@ void print_delivery_screen(char* arrival)
 	hour = min_dis.cost / 3600;
 	min = (min_dis.cost % 3600) / 60;
 	sec = (min_dis.cost % 3600) % 60;
-	printf("2. 최단경로 거리: %d, 비용: %d, 시간: %d시간 %d분 %d초\n", min_cost.km, min_cost.cost, hour, min, sec);
+	printf("2. 최단비용 거리: %d, 비용: %d, 시간: %d시간 %d분 %d초\n", min_cost.km, min_cost.cost, hour, min, sec);
 	
 	hour = min_time.time / 3600;
 	min = (min_time.time % 3600) / 60;
 	sec = (min_time.time % 3600) % 60;
-	printf("3. 최단경로 거리: %d, 비용: %d, 시간: %d시간 %d분 %d초\n", min_time.km, min_time.cost, hour, min, sec);
+	printf("3. 최단시간 거리: %d, 비용: %d, 시간: %d시간 %d분 %d초\n", min_time.km, min_time.cost, hour, min, sec);
 }
 
+// 물건구매 함수
 void menu_1(void)
 {
 	int menu, count = 0, price = 0;
@@ -260,6 +265,7 @@ void menu_1(void)
 			else
 			{
 				print_delivery_screen(c.city);
+				getchar();
 				scanf("%d", &menu);
 				int num = get_City_num(c.city);
 				Road tmp;
@@ -291,6 +297,7 @@ void menu_1(void)
 	}
 }
 
+// 검색한 단어가 들어있는 물건들을 출력하는 함수
 void print_search_list(void)
 {
 	char str[41];
@@ -303,6 +310,12 @@ void print_search_list(void)
 	print_input_square(25, 5);
 	scanf("%s", str);
 	Product* p = search_Product(str);
+	system("cls");
+
+	GotoXY(40, 1);
+	printf("<<%s 검색결과>>", str);
+	GotoXY(35, 2);
+	printf("구매할시 제품명, 카테고리, 개수를 적을것");
 	for (int i = 0; i < search_Product_count(str); i++)
 	{
 		GotoXY(25, 5 + i * 2);
@@ -311,6 +324,7 @@ void print_search_list(void)
 	print_input_square(25, 19);
 }
 
+// 물건 검색 함수
 void menu_2()
 {
 	int menu, count = 0, price = 0;
@@ -370,6 +384,7 @@ void menu_2()
 	}
 }
 
+// 아마 사각형의 틀을 출력하는 함수
 void Rec() {
 	int i;
 	printf("%20s", "");
@@ -394,6 +409,7 @@ void Rec() {
 	printf("┘");
 }
 
+// 관리자 키 변경 메뉴
 void key_menu()
 {
 	char key[20];
@@ -410,6 +426,7 @@ void key_menu()
 	printf(" \n");
 }
 
+// 물건의 정보를 입력받는 함수
 Product resist(char* str)
 {
 	Product res;
@@ -448,6 +465,7 @@ Product resist(char* str)
 	return res;
 }
 
+// 물건 관리 메뉴
 void stuff_menu()
 {
 	int i, menu_num;
@@ -544,6 +562,7 @@ void stuff_menu()
 	}
 }
 
+// 도로의 정보를 입력받는 함수
 Road road_resist(char* str) {
 	Road res;
 
@@ -582,6 +601,7 @@ Road road_resist(char* str) {
 	return res;
 }
 
+// 도로관리 메뉴
 void road_menu() {
 	int i, menu_num;
 	system("cls");
@@ -676,6 +696,7 @@ void road_menu() {
 	}
 }
 
+// 지역의 정보를 입력받는 함수
 City city_resist(char* str) {
 	City res;
 
@@ -691,6 +712,7 @@ City city_resist(char* str) {
 	return res;
 }
 
+// 지역관리 메뉴
 void location_menu() {
 	int i, menu_num;
 	system("cls");
@@ -787,6 +809,7 @@ void location_menu() {
 	}
 }
 
+//관리자 메뉴
 void admin_menu()
 {
 	int i, menu_num;
@@ -896,6 +919,7 @@ void admin_menu()
 			printf("종료합니다.\n");
 			break;
 		}
+		_getch();
 	}
 }
 
@@ -917,6 +941,7 @@ static void menu_maneger()
 	}
 }
 
+//하나의 프로그램으로 합친 함수
 void store_program(void)
 {
 	int menu = 0;

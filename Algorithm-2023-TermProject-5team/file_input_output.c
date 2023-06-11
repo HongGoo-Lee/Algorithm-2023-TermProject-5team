@@ -52,6 +52,7 @@ int get_Category_count(void)
     return res;
 }
 
+//새로운 카테고리를 추가하는 함수
 int add_new_Category(Category c)
 {
     if (check_Category(c) == 0)
@@ -231,7 +232,7 @@ int add_new_Product(Product new_p)
 //제품 정보 수정하는 함수
 int modify_Product(Product old, Product new_p)
 {
-    FILE* file = fopen("물품목록.txt", "r+");
+    FILE* file = fopen("물건목록.txt", "r+");
     if (file == NULL) {
         printf("파일을 여는 도중 오류 발생!\n");
         return 3;
@@ -363,6 +364,7 @@ int get_City_num(char* c)
             break;
         res++;
     }
+    fclose(fp);
     return res;
 }
 
@@ -378,6 +380,7 @@ int get_City_count(void)
         if (del == 0)
             res++;
     }
+    fclose(fp);
     return res;
 }
 
@@ -648,41 +651,49 @@ int add_new_Road(Road new_r)
 {
     FILE* fp1 = NULL;
     FILE* tmp = NULL;
-    if (check_Road(new_r) == 0)
+    City c1,c2;
+    strcpy(c1.city, new_r.start);
+    strcpy(c2.city, new_r.arrival);
+    if (check_City(c1) == 1 && check_City(c2) == 1)
     {
-        fp1 = fopen("도로목록.txt", "r");
-        tmp = fopen("temp.txt", "w");
-        char start[11], arrival[11];
-        int km, cost, time, del = 0, new_del = 0;
-        while (!feof(fp1))
+        if (check_Road(new_r) == 0)
         {
-            fscanf(fp1, "%s %s %d %d %d %d\n", start, arrival, &km, &cost, &time, &del);
-            fprintf(tmp, "%s %s %d %d %d %d\n", start, arrival, km, cost, time, del);
-        }
-        fclose(fp1);
-        fclose(tmp);
-        int state = 0;
-        fp1 = fopen("도로목록.txt", "w");
-        tmp = fopen("temp.txt", "r");
-        while (!feof(tmp))
-        {
-            fscanf(tmp, "%s %s %d %d %d %d\n", start, arrival, &km, &cost, &time, &del);
-            if (strcmp(start, new_r.start) == 0 && state == 0)
+            fp1 = fopen("도로목록.txt", "r");
+            tmp = fopen("temp.txt", "w");
+            char start[11], arrival[11];
+            int km, cost, time, del = 0, new_del = 0;
+            while (!feof(fp1))
             {
-                fprintf(fp1, "%s %s %d %d %d %d\n", new_r.start, new_r.arrival, new_r.km, new_r.cost, new_r.time, new_del);
-                state = 1;
+                fscanf(fp1, "%s %s %d %d %d %d\n", start, arrival, &km, &cost, &time, &del);
+                fprintf(tmp, "%s %s %d %d %d %d\n", start, arrival, km, cost, time, del);
             }
-            fprintf(fp1, "%s %s %d %d %d %d\n", start, arrival, km, cost, time, del);
-        }
-        if (state == 0)
-            fprintf(fp1, "%s %s %d %d %d %d\n", new_r.start, new_r.arrival, new_r.km, new_r.cost, new_r.time, new_del);
-        fclose(fp1);
-        fclose(tmp);
+            fclose(fp1);
+            fclose(tmp);
+            int state = 0;
+            fp1 = fopen("도로목록.txt", "w");
+            tmp = fopen("temp.txt", "r");
+            while (!feof(tmp))
+            {
+                fscanf(tmp, "%s %s %d %d %d %d\n", start, arrival, &km, &cost, &time, &del);
+                if (strcmp(start, new_r.start) == 0 && state == 0)
+                {
+                    fprintf(fp1, "%s %s %d %d %d %d\n", new_r.start, new_r.arrival, new_r.km, new_r.cost, new_r.time, new_del);
+                    state = 1;
+                }
+                fprintf(fp1, "%s %s %d %d %d %d\n", start, arrival, km, cost, time, del);
+            }
+            if (state == 0)
+                fprintf(fp1, "%s %s %d %d %d %d\n", new_r.start, new_r.arrival, new_r.km, new_r.cost, new_r.time, new_del);
+            fclose(fp1);
+            fclose(tmp);
 
-        return 0;
+            return 0;//정상작동
+        }
+        else
+            return 1;// 이미 같은정보의 도로가 있음
     }
     else
-        return 1;
+        return 2;// 없는 지역임
 }
 
 // 도로 수정하는 함수
@@ -765,7 +776,7 @@ int deleteRoad(Road delRoad)
 // 판매내역 기록하는 함수
 void add_new_SoldData(SoldData new_s)
 {
-    FILE* fp = fopen("판매목록.txt", "a");
+    FILE* fp = fopen("판매내역.txt", "a");
     fprintf(fp, "%s %s %d %d %d %d %d %d %c\n", new_s.name, new_s.category, new_s.count, new_s.soldDate.year, new_s.soldDate.month, new_s.soldDate.day, new_s.money, new_s.delivery, new_s.del);
     fclose(fp);
 }

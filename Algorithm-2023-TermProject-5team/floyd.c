@@ -42,11 +42,11 @@ void set_Road_array(Road** array, City* citys, int city_size)
 // 가장 거리가 짧은 루트 찾는 함수
 void get_min_dis_array(Road** array, int size)
 {
-    for (int k = 1; k <= size; k++)
+    for (int k = 0; k < size; k++)
     {
-        for (int i = 1; i <= size; i++)
+        for (int i = 0; i < size; i++)
         {
-            for (int j = 1; j <= size; j++)
+            for (int j = 0; j < size; j++)
             {
                 array[i][j].km = min(array[i][j].km, array[i][k].km + array[k][j].km);
             }
@@ -68,11 +68,11 @@ Road get_min_dis_Road(int num)
 // 가장 비용이 덜 드는 루트 찾는 함수
 void get_min_cost_array(Road** array, int size)
 {
-    for (int k = 1; k <= size; k++)
+    for (int k = 0; k < size; k++)
     {
-        for (int i = 1; i <= size; i++)
+        for (int i = 0; i < size; i++)
         {
-            for (int j = 1; j <= size; j++)
+            for (int j = 0; j < size; j++)
             {
                 array[i][j].cost = min(array[i][j].cost, array[i][k].cost + array[k][j].cost);
             }
@@ -94,11 +94,11 @@ Road get_min_cost_Road(int num)
 // 가장 빨리 배송하는 루트를 찾는 함수
 void get_min_time_array(Road** array, int size)
 {
-    for (int k = 1; k <= size; k++)
+    for (int k = 0; k < size; k++)
     {
-        for (int i = 1; i <= size; i++)
+        for (int i = 0; i < size; i++)
         {
-            for (int j = 1; j <= size; j++)
+            for (int j = 0; j < size; j++)
             {
                 array[i][j].time = min(array[i][j].time, array[i][k].time + array[k][j].time);
             }
