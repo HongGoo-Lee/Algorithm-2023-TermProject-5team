@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
 #include "floyd.h"
 
@@ -19,20 +20,126 @@ int get_file_line(char* fname)
     return res;
 }
 
+//같은 카테고리가 파일에 있는지 확인하는 함수
+int check_Category(Category c)
+{
+    char str[21];
+    int res = 0;
+    FILE* fp = fopen("카테고리목록.txt", "r");
+    while (!feof(fp))
+    {
+        fscanf(fp, "%s\n", str);
+        if (strcmp(c.category, str) == 0)
+        {
+            res = 1;// 있으면 1
+            break;
+        }
+    }
+    return res;
+}
 
+//카테고리의 수를 반환하는 함수
+int get_Category_count(void)
+{
+    char str[41];
+    int res = 0;
+    FILE* fp = fopen("카테고리목록.txt", "r");
+    while (!feof(fp))
+    {
+        fscanf(fp, "%s\n", str);
+        res++;
+    }
+    return res;
+}
+
+int add_new_Category(Category c)
+{
+    if (check_Category(c) == 0)
+    {
+        FILE* fp = fopen("카테고리목록.txt", "a");
+        fprintf(fp, "%s\n", c.category);
+        fclose(fp);
+        return 0;//정상작동
+    }
+    else
+        return 1;//이미 같은그게 있음
+}
+
+//카테고리 목록을 배열로 반환하는 함수
+Category* get_Category_list(void)
+{
+    int i = 0, size = get_Category_count();
+    Category* res = (Category*)calloc(size, sizeof(Category));
+    FILE* fp = fopen("카테고리목록.txt", "r");
+    while (!feof(fp))
+    {
+        fscanf(fp, "%s\n", res[i++].category);
+    }
+    return res;
+}
+
+// 물건의 이름을 입력하면 그 물건의 모든 정보를 구조체로 만들어서 반환하는 함수
+Product get_Product(char* name)
+{
+    Product p;
+    int soldCount, del;
+    FILE* fp = fopen("물건목록.txt", "r");
+    while (!feof(fp))
+    {
+        fscanf(fp, "%s %s %d %d %d %d\n", p.name, p.category, &p.price, &p.count, &soldCount, &del);
+        if (strcmp(p.name, name) == 0)
+        {
+            break;
+        }
+    }
+    return p;
+}
+
+//물건 재고를 반환하는 함수
+int get_product_stock(char* name)
+{
+    FILE* fp = fopen("물건목록.txt", "r");
+    Product p;
+    int soldCount, del, res = -1;
+    while (!feof(fp))
+    {
+        fscanf(fp, "%s %s %d %d %d %d\n", p.name, p.category, &p.price, &p.count, &soldCount, &del);
+        if (strcmp(name, p.name) == 0)
+        {
+            res = p.count;
+            break;
+        }
+    }
+    return res;
+}
 
 //현재 등록된 편의점 물건의 수를 반환하는 함수
 int get_product_count(char* category)
 {
     FILE* fp = fopen("물건목록.txt", "r");
-    char name[41], category1[41];
-    int price, count, soldCount, del, size = 0;
-    while (!feof(fp))
+    char name[41], category1[21];
+    int price, count, soldCount, del=1, size = 0;
+    if (strcmp(category, "전체") == 0)
     {
-        fscanf(fp, "%s&%s&%d&%d&%d&%d\n", name, category1, &price, &count, &soldCount, &del);
-        if (strcmp(category, category1) == 0 && del == 0)
-            size++;
+        printf("전체\n");
+        while (!feof(fp))
+        {
+            fscanf(fp, "%s %s %d %d %d %d\n", name, category1, &price, &count, &soldCount, &del);
+            printf("name = %s, del = %d\n", name, del);
+            if (del == 0)
+                size++;
+        }
     }
+    else
+    {
+        while (!feof(fp))
+        {
+            fscanf(fp, "%s %s %d %d %d %d\n", name, category1, &price, &count, &soldCount, &del);
+            if (strcmp(category, category1) == 0 && del == 0)
+                size++;
+        }
+    }
+    
     fclose(fp);
     return size;
 }
@@ -53,18 +160,31 @@ Product get_struct_product(char* name, char* category, int price, int count)
 Product* get_product_list(char* category)
 {
     FILE* fp = fopen("물건목록.txt", "r");
-    char name[41], category1[41];
+    char name[41], category1[21];
     int price, count, soldCount, del, size, i = 0;
     size = get_product_count(category);
     Product* res = (Product*)calloc(size, sizeof(Product));
-    while (!feof(fp))
+    if (strcmp(category, "전체") == 0)
     {
-        fscanf(fp, "%s&%s&%d&%d&%d&%d\n", name, category1, &price, &count, &soldCount, &del);
-        if (strcmp(category, category1) == 0 && del == 0)
+        while (!feof(fp))
         {
-            res[i++] = get_struct_product(name, category1, price, count);
+            fscanf(fp, "%s %s %d %d %d %d\n", name, category1, &price, &count, &soldCount, &del);
+            if (del == 0)
+                res[i++] = get_struct_product(name, category1, price, count);
         }
     }
+    else
+    {
+        while (!feof(fp))
+        {
+            fscanf(fp, "%s %s %d %d %d %d\n", name, category1, &price, &count, &soldCount, &del);
+            if (strcmp(category, category1) == 0 && del == 0)
+            {
+                res[i++] = get_struct_product(name, category1, price, count);
+            }
+        }
+    }
+
     fclose(fp);
     return res;
 }
@@ -72,12 +192,12 @@ Product* get_product_list(char* category)
 // 같은 제품이 있는지 확인하는 함수
 int check_Product(Product product)
 {
-    FILE* fp = fopen("물품목록.txt", "r");
+    FILE* fp = fopen("물건목록.txt", "r");
     Product p;
     int soldCount, del, res = 0;
     while (!feof(fp))
     {
-        fscanf(fp, "%s&%s&%d&%d&%d&%d\n", p.name, p.category, &p.price, &p.count, &soldCount, &del);
+        fscanf(fp, "%s %s %d %d %d %d\n", p.name, p.category, &p.price, &p.count, &soldCount, &del);
         if (strcmp(p.name, product.name) == 0)
         {
             res = 1;// 같은 제품이 있음
@@ -94,9 +214,12 @@ int add_new_Product(Product new_p)
     int soldCount = 0, del = 0;
     if (check_Product(new_p) == 0)
     {
-        FILE* fp = fopen("물품목록.txt", "a");
-        fprintf(fp, "%s&%s&%d&%d&%d&%d\n", new_p.name, new_p.category, new_p.price, new_p.count, soldCount, del);
+        FILE* fp = fopen("물건목록.txt", "a");
+        fprintf(fp, "%s %s %d %d %d %d\n", new_p.name, new_p.category, new_p.price, new_p.count, soldCount, del);
         fclose(fp);
+        Category c;
+        strcpy(c.category, new_p.category);
+        add_new_Category(c);
         return 0;// 정상작동
     }
     else
@@ -105,7 +228,7 @@ int add_new_Product(Product new_p)
     }
 }
 
-//제품 정보 수정하는 함수 조건문에서 조건 수정해야함
+//제품 정보 수정하는 함수
 int modify_Product(Product old, Product new_p)
 {
     FILE* file = fopen("물품목록.txt", "r+");
@@ -118,12 +241,12 @@ int modify_Product(Product old, Product new_p)
     long int pos;
     int found = 0, del, soldCount, res = 0;
 
-    if (check_Product(old) == 1 && check_Product(new_p) == 0)
+    if (check_Product(old) == 1 && (check_Product(new_p) == 0 || strcmp(old.name,new_p.name)==0))
     {
         while (!feof(file))
         {
             pos = ftell(file);
-            fscanf(file, "%s&%s&%d&%d&%d&%d\n", product.name, product.category, &product.price, &product.count, &soldCount, &del);
+            fscanf(file, "%s %s %d %d %d %d\n", product.name, product.category, &product.price, &product.count, &soldCount, &del);
             if (strcmp(old.name, product.name) == 0 && del == 0)
             {
                 found = 1;
@@ -133,7 +256,7 @@ int modify_Product(Product old, Product new_p)
         if (found == 1)
         {
             fseek(file, pos, SEEK_SET);
-            fprintf(file, "%s&%s&%d&%d&%d&%d\n", product.name, product.category, product.price, product.count, soldCount, del);
+            fprintf(file, "%s %s %d %d %d %d\n", product.name, product.category, product.price, product.count, soldCount, del);
             res = 0;// 정상적으로 수정함
         }
     }
@@ -156,7 +279,7 @@ int delete_Product(Product old)
         return 3;
     }
 
-    Product item;
+    Product p;
     long int pos;
     int found = 0, soldCount = 0, del = 0, res = 0;
     if (check_Product(old) == 1)
@@ -164,8 +287,8 @@ int delete_Product(Product old)
         while (!feof(file))
         {
             pos = ftell(file);
-            fscanf(file, "%s&%s&%d&%d&%d&%d\n", item.name, item.category, &item.price, &item.count, &soldCount, &del);
-            if (strcmp(old.name, item.name) == 0 && del == 0)
+            fscanf(file, "%s %s %d %d %d %d\n", p.name, p.category, &p.price, &p.count, &soldCount, &del);
+            if (strcmp(old.name, p.name) == 0 && del == 0)
             {
                 found = 1;
                 break;
@@ -173,8 +296,8 @@ int delete_Product(Product old)
         }
         if (found == 1)
         {
-            fseek(file, pos - strlen(item.name) - 1, SEEK_SET);
-            fprintf(file, "%s&%s&%d&%d&%d&%d\n", item.name, item.category, item.price, item.count, soldCount, del);
+            fseek(file, pos - strlen(p.name) - 1, SEEK_SET);
+            fprintf(file, "%s&%s&%d&%d&%d&%d\n", p.name, p.category, p.price, p.count, soldCount, del);
             res = 0;//정상작동
         }
         else
@@ -192,7 +315,56 @@ int delete_Product(Product old)
     return res;
 }
 
+// 검색하려는 단어가 포함된 물건의 수를 반환하는 함수
+int search_Product_count(char* str)
+{
+    FILE* fp = fopen("물건목록.txt", "r");
+    int res = 0,soldCount,del;
+    Product p;
+    while (!feof(fp))
+    {
+        fscanf(fp, "%s %s %d %d %d %d\n", p.name, p.category, &p.price, &p.count, &soldCount, &del);
+        if ((strstr(p.name, str) != NULL) && del == 0)
+            res++;
+    }
+    return res;
+}
 
+//검색하려는 단어가 포함된 물건들을 배열로 만들어서 반환하는 함수
+Product* search_Product(char* str)
+{
+    int size = search_Product_count(str), i = 0, soldCount, del;
+    Product p;
+    Product* res = (Product*)calloc(size, sizeof(Product));
+    FILE* fp = fopen("물건목록.txt", "r");
+    while (!feof(fp))
+    {
+        fscanf(fp, "%s %s %d %d %d %d\n", p.name, p.category, &p.price, &p.count, &soldCount, &del);
+        if ((strstr(p.name, str) != NULL) && del == 0)
+        {
+            res[i++] = p;
+        }
+    }
+    return res;
+}
+
+
+//지역이 배열에서 몇번째인지 반환하는 함수
+int get_City_num(char* c)
+{
+    FILE* fp = fopen("지역목록.txt", "r");
+    int res = 0, del;
+    City tmp, c1;
+    strcpy(c1.city, c);
+    while (!feof(fp))
+    {
+        fscanf(fp, "%s %d\n", tmp.city, &del);
+        if (strcmp(c1.city, tmp.city) == 0)
+            break;
+        res++;
+    }
+    return res;
+}
 
 //등록된 지역의 수를 반환하는 함수
 int get_City_count(void)
@@ -202,7 +374,7 @@ int get_City_count(void)
     int del, res = 0;
     while (!feof(fp))
     {
-        fscanf(fp, "%s&%d\n", tmp.city, &del);
+        fscanf(fp, "%s %d\n", tmp.city, &del);
         if (del == 0)
             res++;
     }
@@ -218,7 +390,7 @@ City* get_City_list(void)
     City tmp;
     while (!feof(fp))
     {
-        fscanf(fp, "%s&%d\n", tmp.city, &del);
+        fscanf(fp, "%s %d\n", tmp.city, &del);
         if (del == 0)
             strcpy(res[i++].city, tmp.city);
     }
@@ -234,7 +406,7 @@ int check_City(City city)
     int del, res = 0;
     while (!feof(fp))
     {
-        fscanf(fp, "%s&%d\n", c.city, &del);
+        fscanf(fp, "%s %d\n", c.city, &del);
         if (strcmp(c.city, city.city) == 0)
         {
             res = 1;
@@ -251,7 +423,7 @@ int add_new_City(City new_c)
     if (check_City(new_c) == 0)
     {
         FILE* fp = fopen("지역목록.txt", "a");
-        fprintf(fp, "%s&%d\n", new_c.city, 0);
+        fprintf(fp, "%s %d\n", new_c.city, 0);
         fclose(fp);
         return 0;// 정상작동
     }
@@ -277,7 +449,7 @@ int modifyCity(City old, City new_c)
         while (!feof(file))
         {
             pos = ftell(file);
-            fscanf(file, "%s&%d\n", city.city, &del);
+            fscanf(file, "%s %d\n", city.city, &del);
             if (strcmp(old.city, city.city) == 0 && del == 0)
             {
                 found = 1;
@@ -287,7 +459,7 @@ int modifyCity(City old, City new_c)
         if (found == 1)
         {
             fseek(file, pos, SEEK_SET);
-            fprintf(file, "%s&%d\n", new_c.city, del);
+            fprintf(file, "%s %d\n", new_c.city, del);
             res = 0;// 정상작동
         }
         fclose(file);
@@ -318,7 +490,7 @@ int deleteCity(City old)
         while (!feof(file))
         {
             pos = ftell(file);
-            fscanf(file, "%s&%d\n", city.city, &del);
+            fscanf(file, "%s %d\n", city.city, &del);
             if (strcmp(old.city, city.city) == 0 && del == 0)
             {
                 found = 1;
@@ -328,7 +500,7 @@ int deleteCity(City old)
         if (found == 1)
         {
             fseek(file, pos, SEEK_SET);
-            fprintf(file, "%s&%d\n", old.city, 1);
+            fprintf(file, "%s %d\n", old.city, 1);
             res = 0;
         }
         else
@@ -356,7 +528,7 @@ Road get_Road(char* start, char* arrival)
     int del = 0, state = 0;
     while (!feof(fp))
     {
-        fscanf(fp, "%s&%s&%d&%d&%d&%d\n", res.start, res.arrival, &res.km, &res.cost, &res.time, &del);
+        fscanf(fp, "%s %s %d %d %d %d\n", res.start, res.arrival, &res.km, &res.cost, &res.time, &del);
         if (strcmp(start, res.start) == 0 && strcmp(arrival, res.arrival) == 0 && del == 0)
         {
             state = 1;
@@ -383,7 +555,7 @@ int check_Road(Road road)
     int res = 0;
     while (!feof(fp))
     {
-        fscanf(fp, "%s&%s&%d&%d&%d&%d\n", start, arrival, &km, &cost, &time, &del);
+        fscanf(fp, "%s %s %d %d %d %d\n", start, arrival, &km, &cost, &time, &del);
         if (strcmp(start, road.start) == 0 && strcmp(arrival, road.arrival) == 0)
         {
             res = 1;
@@ -400,11 +572,11 @@ int get_Road_count(char* start)
     FILE* fp = fopen("도로목록.txt", "r");
     char fstart[11], arrival[11];
     int km, cost, time, del, res = 0;
-    if (strcmp(start, "all") == 0)
+    if (strcmp(start, "전체") == 0)
     {
         while (!feof(fp))
         {
-            fscanf(fp, "%s&%s&%d&%d&%d%d\n", fstart, arrival, &km, &cost, &time, &del);
+            fscanf(fp, "%s %s %d %d %d %d\n", fstart, arrival, &km, &cost, &time, &del);
             if (del == 0)
                 res++;
         }
@@ -414,7 +586,7 @@ int get_Road_count(char* start)
     {
         while (!feof(fp))
         {
-            fscanf(fp, "%s&%s&%d&%d&%d%d\n", fstart, arrival, &km, &cost, &time, &del);
+            fscanf(fp, "%s %s %d %d %d %d\n", fstart, arrival, &km, &cost, &time, &del);
             if (strcmp(start, fstart) == 0 && del == 0)
                 res++;
         }
@@ -445,11 +617,11 @@ Road* get_Road_list(char* start)
     int km, cost, time, del;
     int i = 0;
     FILE* fp = fopen("도로목록.txt", "r");
-    if (strcmp(start, "all") == 0)
+    if (strcmp(start, "전체") == 0)
     {
         while (!feof(fp))
         {
-            fscanf(fp, "%s&%s&%d&%d&%d%d\n", fstart, arrival, &km, &cost, &time, &del);
+            fscanf(fp, "%s %s %d %d %d %d\n", fstart, arrival, &km, &cost, &time, &del);
             if (del == 0)
                 res[i++] = make_struct_Road(fstart, arrival, km, cost, time);
         }
@@ -458,7 +630,7 @@ Road* get_Road_list(char* start)
     {
         while (!feof(fp))
         {
-            fscanf(fp, "%s&%s&%d&%d&%d%d\n", fstart, arrival, &km, &cost, &time, &del);
+            fscanf(fp, "%s %s %d %d %d %d\n", fstart, arrival, &km, &cost, &time, &del);
             if (strcmp(start, fstart) == 0 && del == 0)
             {
                 res[i++] = make_struct_Road(fstart, arrival, km, cost, time);
@@ -484,8 +656,8 @@ int add_new_Road(Road new_r)
         int km, cost, time, del = 0, new_del = 0;
         while (!feof(fp1))
         {
-            fscanf(fp1, "%s&%s&%d&%d&%d&%d\n", start, arrival, &km, &cost, &time, &del);
-            fprintf(tmp, "%s&%s&%d&%d&%d&%d\n", start, arrival, km, cost, time, del);
+            fscanf(fp1, "%s %s %d %d %d %d\n", start, arrival, &km, &cost, &time, &del);
+            fprintf(tmp, "%s %s %d %d %d %d\n", start, arrival, km, cost, time, del);
         }
         fclose(fp1);
         fclose(tmp);
@@ -494,16 +666,16 @@ int add_new_Road(Road new_r)
         tmp = fopen("temp.txt", "r");
         while (!feof(tmp))
         {
-            fscanf(tmp, "%s&%s&%d&%d&%d&%d\n", start, arrival, &km, &cost, &time, &del);
+            fscanf(tmp, "%s %s %d %d %d %d\n", start, arrival, &km, &cost, &time, &del);
             if (strcmp(start, new_r.start) == 0 && state == 0)
             {
-                fprintf(fp1, "%s&%s&%d&%d&%d&%d\n", new_r.start, new_r.arrival, new_r.km, new_r.cost, new_r.time, new_del);
+                fprintf(fp1, "%s %s %d %d %d %d\n", new_r.start, new_r.arrival, new_r.km, new_r.cost, new_r.time, new_del);
                 state = 1;
             }
-            fprintf(fp1, "%s&%s&%d&%d&%d&%d\n", start, arrival, km, cost, time, del);
+            fprintf(fp1, "%s %s %d %d %d %d\n", start, arrival, km, cost, time, del);
         }
         if (state == 0)
-            fprintf(fp1, "%s&%s&%d&%d&%d&%d\n", new_r.start, new_r.arrival, new_r.km, new_r.cost, new_r.time, new_del);
+            fprintf(fp1, "%s %s %d %d %d %d\n", new_r.start, new_r.arrival, new_r.km, new_r.cost, new_r.time, new_del);
         fclose(fp1);
         fclose(tmp);
 
@@ -528,10 +700,10 @@ int modifyRoad(Road old, Road new_r) {
     {
         while (!feof(file)) {
             pos = ftell(file);
-            fscanf(file, "%s&%s&%d&%d&%d&%d\n", edge.start, edge.arrival, &edge.km, &edge.cost, &edge.time, &del);
+            fscanf(file, "%s %s %d %d %d %d\n", edge.start, edge.arrival, &edge.km, &edge.cost, &edge.time, &del);
             if (strcmp(old.start, edge.start) == 0 && strcmp(old.arrival, edge.arrival) == 0 && del == 0) {
                 fseek(file, pos, SEEK_SET);
-                fprintf(file, "%s&%s&%d&%d&%d&%d\n", new_r.start, new_r.arrival, new_r.km, new_r.cost, new_r.time, 0);
+                fprintf(file, "%s %s %d %d %d %d\n", new_r.start, new_r.arrival, new_r.km, new_r.cost, new_r.time, 0);
                 break;
             }
         }
@@ -563,7 +735,7 @@ int deleteRoad(Road delRoad)
         while (!feof(fp))
         {
             pos = ftell(fp);
-            fscanf(fp, "%s&%s&%d&%d&%d&%d\n", edge.start, edge.arrival, &edge.km, &edge.cost, &edge.time, &del);
+            fscanf(fp, "%s %s %d %d %d %d\n", edge.start, edge.arrival, &edge.km, &edge.cost, &edge.time, &del);
             if (strcmp(delRoad.start, edge.start) == 0 && strcmp(delRoad.arrival, edge.arrival) == 0 && del == 0)
             {
                 found = 1;
@@ -573,7 +745,7 @@ int deleteRoad(Road delRoad)
         if (found == 1)
         {
             fseek(fp, pos, SEEK_SET);
-            fprintf(fp, "%s&%s&%d&%d&%d&%d\n", delRoad.start, delRoad.arrival, delRoad.km, delRoad.cost, delRoad.time, 1);
+            fprintf(fp, "%s %s %d %d %d %d\n", delRoad.start, delRoad.arrival, delRoad.km, delRoad.cost, delRoad.time, 1);
             res = 0;//정상
         }
         else
@@ -594,7 +766,7 @@ int deleteRoad(Road delRoad)
 void add_new_SoldData(SoldData new_s)
 {
     FILE* fp = fopen("판매목록.txt", "a");
-    fprintf(fp, "%s&%s&%d&%d%d%d%d%d%c\n", new_s.name, new_s.category, new_s.count, new_s.soldDate.year, new_s.soldDate.month, new_s.soldDate.day, new_s.money, new_s.delivery, new_s.del);
+    fprintf(fp, "%s %s %d %d %d %d %d %d %c\n", new_s.name, new_s.category, new_s.count, new_s.soldDate.year, new_s.soldDate.month, new_s.soldDate.day, new_s.money, new_s.delivery, new_s.del);
     fclose(fp);
 }
 
@@ -634,14 +806,46 @@ SoldData* get_soldData_list(void)
     FILE* fp = fopen("판매내역.txt", "r");
     while (!feof(fp))
     {
-        fscanf(fp, "%s&%s&%d&%d%d%d%d%d%c\n", name, category, &count, &year, &month, &day, &money, &delivery, &del);
+        fscanf(fp, "%s %s %d %d %d %d %d %d %c\n", name, category, &count, &year, &month, &day, &money, &delivery, &del);
         res[i++] = make_struct_SoldData(name, category, count, year, month, day, money, delivery, del);
     }
     fclose(fp);
     return res;
 }
 
+//제품과 구매하는 수를 입력받아 지불해야하는 가격을 구해주는 함수
+int cal_money(char* name, int count)
+{
+    Product p;
+    int soldCount, del, res = 0;
+    FILE* fp = fopen("물건목록.txt", "r");
+    while (!feof(fp))
+    {
+        fscanf(fp, "%s %s %d %d %d %d\n", p.name, p.category, &p.price, &p.count, &soldCount, &del);
+        if (strcmp(p.name, name) == 0)
+        {
+            res = p.price * count;
+            break;
+        }
+    }
+    return res;
+}
 
+//제품구매
+void buy_product(char* name, char* category, int count, int price, int delivery)
+{
+    time_t timer;
+    struct tm* t;
+    timer = time(NULL); // 1970년 1월 1일 0시 0분 0초부터 시작하여 현재까지의 초
+    t = localtime(&timer);
+    SoldData s;
+    s = make_struct_SoldData(name, category, count, t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, price, delivery, 0);
+    add_new_SoldData(s);
+    Product p = get_Product(name), p2;
+    p2 = p;
+    p2.count -= count;
+    modify_Product(p, p2);
+}
 
 
 

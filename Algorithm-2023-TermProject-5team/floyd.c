@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "floyd.h"
+#include "file_input_output.h"
 
 //2차원 인접 행렬을 만들어주는 함수
 Road** create_Road_array(int size)
@@ -54,6 +54,17 @@ void get_min_dis_array(Road** array, int size)
     }
 }
 
+//편의점으로부터 특정 지역까지 최단거리를 찾아서 그 정보를 반환하는 함수
+Road get_min_dis_Road(int num)
+{
+    City* c_array = get_City_list();
+    int c_size = get_City_count();
+    Road** res = create_Road_array(c_size);
+    set_Road_array(res, c_array, c_size);
+    get_min_dis_array(res, c_size);
+    return res[0][num];
+}
+
 // 가장 비용이 덜 드는 루트 찾는 함수
 void get_min_cost_array(Road** array, int size)
 {
@@ -69,6 +80,17 @@ void get_min_cost_array(Road** array, int size)
     }
 }
 
+//편의점으로부터 특정 지역까지 비용이 제일 저렴한 길을 찾아서 그 정보를 반환하는 함수
+Road get_min_cost_Road(int num)
+{
+    City* c_array = get_City_list();
+    int c_size = get_City_count();
+    Road** res = create_Road_array(c_size);
+    set_Road_array(res, c_array, c_size);
+    get_min_cost_array(res, c_size);
+    return res[0][num];
+}
+
 // 가장 빨리 배송하는 루트를 찾는 함수
 void get_min_time_array(Road** array, int size)
 {
@@ -82,4 +104,15 @@ void get_min_time_array(Road** array, int size)
             }
         }
     }
+}
+
+//편의점으로부터 특정 지역까지 시간이 제일 빠른 길을 찾아서 그 정보를 반환하는 함수
+Road get_min_time_Road(int num)
+{
+    City* c_array = get_City_list();
+    int c_size = get_City_count();
+    Road** res = create_Road_array(c_size);
+    set_Road_array(res, c_array, c_size);
+    get_min_time_array(res, c_size);
+    return res[0][num];
 }

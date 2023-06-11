@@ -29,3 +29,11 @@ SoldData make_struct_SoldData(char* name, char* category, int count, int year, i
 SoldData* get_soldData_list(void);
 int check_manager_key(char* key);
 void reset_manager_key(char* key);
+int get_Category_count(void);
+Category* get_Category_list(void);
+int check_Category(Category c);
+int cal_money(char* name, int count);
+int get_City_num(char* c);
+void buy_product(char* name, char* category, int count, int price, int delivery);
+Product* search_Product(char* str);
+int search_Product_count(char* str);

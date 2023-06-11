@@ -1,4 +1,6 @@
+#include "UI.h"
+
 void main(void)
 {
-	test_ui();
+	store_program();
 }

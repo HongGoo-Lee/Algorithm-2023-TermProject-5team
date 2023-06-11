@@ -24,9 +24,6 @@
     <ClCompile Include="floyd.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="test.c">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="file_input_output.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -36,6 +33,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="file_input_output.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -17,7 +17,7 @@ typedef struct _road {
 
 typedef struct _product {
     char name[41];
-    char category[41];
+    char category[21];
     int price;
     int count;
 }Product;
@@ -28,7 +28,7 @@ typedef struct _city {
 
 typedef struct _soldData {
     char name[41];
-    char category[41];
+    char category[21];
     int count;
     Date soldDate;
     int money;
@@ -36,8 +36,15 @@ typedef struct _soldData {
     char del;//환불여부
 }SoldData;
 
+typedef struct _category {
+    char category[21];
+}Category;
+
 Road** create_Road_array(int size);
 void set_Road_array(Road** array, City* citys, int city_size);
 void get_min_dis_array(Road** array, int size);
 void get_min_cost_array(Road** array, int size);
 void get_min_time_array(Road** array, int size);
+Road get_min_dis_Road(int num);
+Road get_min_cost_Road(int num);
+Road get_min_time_Road(int num);
